@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bgGlow" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#0E1E38" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#080C14" stop-opacity="1" />
+    </radialGradient>
+
+    <!-- Cyan Neon Gradient -->
+    <linearGradient id="cyanGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F2FE" />
+      <stop offset="100%" stop-color="#06B6D4" />
+    </linearGradient>
+
+    <!-- Drop Shadow Filter for Glow -->
+    <filter id="neonBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <filter id="boxShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- Deep Obsidian Background -->
+  <rect width="100%" height="100%" fill="#080C14" rx="24"/>
+  <rect width="100%" height="100%" fill="url(#bgGlow)" rx="24"/>
+
+  <!-- Subtle Blueprint Tech Grid Lines -->
+  <g opacity="0.08" stroke="#00F2FE" stroke-width="1">
+    <line x1="80" y1="0" x2="80" y2="480" />
+    <line x1="140" y1="0" x2="140" y2="480" />
+    <line x1="200" y1="0" x2="200" y2="480" />
+    <line x1="260" y1="0" x2="260" y2="480" />
+    <line x1="320" y1="0" x2="320" y2="480" />
+    <line x1="0" y1="80" x2="400" y2="80" />
+    <line x1="0" y1="140" x2="400" y2="140" />
+    <line x1="0" y1="200" x2="400" y2="200" />
+    <line x1="0" y1="260" x2="400" y2="260" />
+    <line x1="0" y1="320" x2="400" y2="320" />
+  </g>
+
+  <!-- Stepped Data Blocks Glyph (Faithfully based on user sketch) -->
+  <g transform="translate(100, 50)" filter="url(#boxShadow)">
+    <!-- Top block (Col 3, Row 0) -->
+    <rect x="100" y="0" width="50" height="50" rx="6" fill="url(#cyanGlow)" filter="url(#neonBlur)"/>
+    <rect x="100" y="0" width="50" height="50" rx="6" fill="url(#cyanGlow)"/>
+
+    <!-- Upper horizontal bar (Col 1-2, Row 1) -->
+    <rect x="0" y="50" width="100" height="50" rx="6" fill="#1E293B" stroke="#334155" stroke-width="2"/>
+
+    <!-- Middle-right vertical block (Col 3, Row 2) -->
+    <rect x="100" y="100" width="50" height="50" rx="6" fill="url(#cyanGlow)"/>
+
+    <!-- Lower horizontal bar (Col 2-3, Row 3) -->
+    <rect x="50" y="150" width="100" height="50" rx="6" fill="#1E293B" stroke="#334155" stroke-width="2"/>
+
+    <!-- Bottom single block (Col 1, Row 4) -->
+    <rect x="0" y="200" width="50" height="50" rx="6" fill="url(#cyanGlow)" filter="url(#neonBlur)"/>
+    <rect x="0" y="200" width="50" height="50" rx="6" fill="url(#cyanGlow)"/>
+  </g>
+
+  <!-- LODEX Wordmark (Modular Tech Typography) -->
+  <g transform="translate(200, 395)" text-anchor="middle">
+    <text font-family="'Plus Jakarta Sans', 'Chakra Petch', 'Orbitron', monospace, sans-serif" 
+          font-weight="800" 
+          font-size="46" 
+          letter-spacing="8" 
+          fill="#FFFFFF">
+      LODE<tspan fill="#00F2FE">X</tspan>
+    </text>
+    <text y="32" 
+          font-family="'JetBrains Mono', monospace" 
+          font-size="11" 
+          letter-spacing="4" 
+          fill="#64748B" 
+          font-weight="500">
+      KNOWLEDGE INDEXING ENGINE
+    </text>
+  </g>
+</svg>

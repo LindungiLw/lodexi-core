@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LODEX - Official Brand & Logo Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700;800&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #080C14;
+      --surface: #0F172A;
+      --border: rgba(255, 255, 255, 0.08);
+      --cyan: #00F2FE;
+      --cyan-dark: #06B6D4;
+      --indigo: #6366F1;
+      --mint: #10B981;
+      --text: #F8FAFC;
+      --muted: #94A3B8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      width: 100%;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 99px;
+      background: rgba(0, 242, 254, 0.1);
+      border: 1px solid rgba(0, 242, 254, 0.3);
+      color: var(--cyan);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 768px) {
+      .cards-grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .svg-container {
+      max-width: 280px;
+      width: 100%;
+    }
+
+    .typography-box {
+      width: 100%;
+      text-align: left;
+      background: rgba(8, 12, 20, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 16px;
+    }
+
+    .sample-wordmark {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: 6px;
+      margin-bottom: 8px;
+    }
+
+    .sample-wordmark span { color: var(--cyan); }
+
+    .color-swatches {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      width: 100%;
+      margin-top: 24px;
+    }
+
+    .swatch {
+      padding: 16px 8px;
+      border-radius: 10px;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .swatch-obsidian { background: #080C14; border: 1px solid #334155; color: white; }
+    .swatch-slate { background: #0F172A; border: 1px solid #334155; color: white; }
+    .swatch-cyan { background: #00F2FE; color: #080C14; }
+    .swatch-mint { background: #10B981; color: #080C14; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="badge">BRAND DESIGN SYSTEM</div>
+      <h1>LODEX Identity Showcase</h1>
+      <p class="subtitle">Decoupled Multi-Tenant Knowledge Indexing Middleware</p>
+    </div>
+
+    <div class="cards-grid">
+      <!-- Card 1: Vector SVG Asset -->
+      <div class="card">
+        <div class="card-title">Vector Logo (SVG)</div>
+        <div class="svg-container">
+          <!-- Embed SVG directly -->
+          <img src="lodex_logo.svg" alt="LODEX Vector Logo" style="width: 100%; height: auto; border-radius: 16px;">
+        </div>
+      </div>
+
+      <!-- Card 2: Typography & Philosophy -->
+      <div class="card" style="align-items: flex-start; text-align: left;">
+        <div class="card-title">Font & Concept Analysis</div>
+        
+        <div style="margin-bottom: 12px;">
+          <h3 style="font-size: 16px; margin-bottom: 6px; color: var(--cyan);">1. Modular Stepped Glyph</h3>
+          <p style="font-size: 14px; color: var(--muted); line-height: 1.6;">
+            Ikon blok tangga zig-zag melambangkan <strong>"Rangkaian Chunks / Data Blocks"</strong> yang menghubungkan pertanyaan dari bawah ke dokumen sumber di atas. Sangat futuristik ala modern developer tools.
+          </p>
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <h3 style="font-size: 16px; margin-bottom: 6px; color: var(--cyan);">2. Font Khusus (Chakra Petch / Modular Tech)</h3>
+          <p style="font-size: 14px; color: var(--muted); line-height: 1.6;">
+            Huruf dengan potongan sudut siku (*chamfered cuts*) sangat serasi dengan ikon blok kotaknya. Memberikan kesan AI yang presisi dan tidak kaku.
+          </p>
+        </div>
+
+        <div class="typography-box">
+          <div class="sample-wordmark">LODE<span>X</span></div>
+          <p style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted);">
+            Display Font: Chakra Petch (800 Bold)<br>
+            Secondary Font: Plus Jakarta Sans / JetBrains Mono
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="align-items: flex-start; text-align: left;">
+      <div class="card-title">Color Tokens</div>
+      <div class="color-swatches">
+        <div class="swatch swatch-obsidian">#080C14<br>Obsidian</div>
+        <div class="swatch swatch-slate">#0F172A<br>Surface</div>
+        <div class="swatch swatch-cyan">#00F2FE<br>Hyper Cyan</div>
+        <div class="swatch swatch-mint">#10B981<br>Verified</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
