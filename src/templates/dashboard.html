@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LODEXI - Knowledge Indexing & Grounded Retrieval Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700;800&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-void: #0F172A; /* slate-900 */
+      --surface-card: #1E293B; /* slate-800 */
+      --surface-input: #334155; /* slate-700 */
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(177, 229, 230, 0.4);
+      --cyan: #B1E5E6;
+      --cyan-glow: rgba(177, 229, 230, 0.2);
+      --coral: #F29191;
+      --indigo: #6366F1;
+      --mint: #10B981;
+      --mint-glow: rgba(16, 185, 129, 0.15);
+      --text-white: #F8FAFC;
+      --text-muted: #94A3B8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-void);
+      color: var(--text-white);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+    }
+
+    .logo-glyph {
+      width: 36px;
+      height: 36px;
+    }
+
+    .brand-title {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      background: linear-gradient(to right, var(--cyan), var(--coral));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
+    }
+    .brand-title span { -webkit-text-fill-color: #FFF; }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .tenant-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface-input);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 99px;
+      font-size: 13px;
+    }
+
+    .tenant-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--mint);
+      box-shadow: 0 0 8px var(--mint);
+    }
+
+    select.tenant-select {
+      background: transparent;
+      border: none;
+      color: var(--text-white);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+    }
+    select.tenant-select option {
+      background: #0F172A;
+      color: #FFF;
+    }
+
+    .docs-btn {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    .docs-btn:hover {
+      color: var(--cyan);
+      border-color: var(--cyan);
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    .hero-banner {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .hero-banner h2 {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .hero-banner p {
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    /* Tabs Bar */
+    .tabs-nav {
+      display: flex;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 28px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--surface-card);
+      border-color: var(--border);
+      color: var(--cyan);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    /* Tab Content Cards */
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    .card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: 0 16px 32px rgba(0,0,0,0.4);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, textarea {
+      width: 100%;
+      background: var(--surface-input);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--text-white);
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px var(--cyan-glow);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .primary-btn {
+      background: var(--coral);
+      color: #0F172A;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.1s, box-shadow 0.2s;
+    }
+    .primary-btn:hover {
+      box-shadow: 0 0 18px rgba(242, 145, 145, 0.4);
+      transform: translateY(-1px);
+    }
+    .primary-btn:active { transform: translateY(0); }
+
+    .btn-secondary {
+      background: var(--surface-input);
+      border: 1px solid var(--border);
+      color: var(--text-white);
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 8px;
+    }
+    .btn-secondary:hover { border-color: var(--cyan); color: var(--cyan); }
+
+    /* Results section */
+    .results-container {
+      margin-top: 24px;
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+    }
+
+    .result-card {
+      background: var(--surface-input);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 14px;
+      transition: border-color 0.2s;
+    }
+    .result-card:hover { border-color: rgba(0, 242, 254, 0.3); }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .result-title { font-size: 16px; font-weight: 700; color: #FFF; }
+    .score-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(177, 229, 230, 0.1);
+      color: var(--cyan);
+      border: 1px solid rgba(177, 229, 230, 0.2);
+    }
+
+    .result-snippet {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Answer box */
+    .answer-box {
+      background: rgba(16, 185, 129, 0.05);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 14px;
+      padding: 22px;
+      margin-top: 20px;
+    }
+    .answer-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .grounded-badge {
+      background: var(--mint);
+      color: #080C14;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 1px;
+    }
+    .answer-text {
+      font-size: 15px;
+      line-height: 1.7;
+      color: #FFF;
+      margin-bottom: 16px;
+    }
+
+    .citation-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .citation-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: var(--surface-input);
+      border: 1px solid var(--border);
+      color: var(--cyan);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+    <a href="/" class="brand-group">
+      <!-- SVG Logo Icon based on user sketch -->
+      <svg width="36" height="36" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M 25 15 C 25 15, 25 75, 25 75 C 25 85, 35 85, 35 85 L 85 85" stroke="#B1E5E6" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M 45 35 C 45 35, 45 65, 45 65 C 45 70, 50 70, 50 70 L 75 70" stroke="#F29191" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="25" cy="15" r="4" fill="#B1E5E6"/>
+        <circle cx="85" cy="85" r="4" fill="#B1E5E6"/>
+        <circle cx="45" cy="35" r="4" fill="#F29191"/>
+        <circle cx="75" cy="70" r="4" fill="#F29191"/>
+      </svg>
+      <span style="font-size: 24px; font-weight: 900; letter-spacing: 0.1em; background: linear-gradient(to right, var(--cyan), var(--coral)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase;">
+          L<span style="-webkit-text-fill-color: #FFF;">O</span>DEXI
+      </span>
+    </a>
+
+    <div class="header-actions">
+      <div class="tenant-badge">
+        <div class="tenant-dot"></div>
+        <span>Active Tenant:</span>
+        <select id="tenantSelector" class="tenant-select" onchange="switchTenant()">
+          <option value="key_jiulibrary_secret_123" data-id="jiulibrary">jiulibrary (Perpus)</option>
+          <option value="key_staffportal_secret_456" data-id="staff_portal">staff_portal (HR Staf)</option>
+        </select>
+      </div>
+
+      <a href="/docs" target="_blank" class="docs-btn">Interactive API Docs &rarr;</a>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main>
+    <div class="hero-banner">
+      <h2>Decoupled Multi-Tenant Knowledge Playground</h2>
+      <p>Test semantic search for library catalogs and grounded question-answering for institutional SOPs in real-time.</p>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="setTab('searchTab')">
+        🔍 Semantic Search (Catalog)
+      </button>
+      <button class="tab-btn" onclick="setTab('askTab')">
+        💬 Grounded Q&A Assistant (SOP)
+      </button>
+      <button class="tab-btn" onclick="setTab('ingestTab')">
+        📥 Ingest Knowledge Document
+      </button>
+    </div>
+
+    <!-- Tab 1: Semantic Search (jiulibrary mode) -->
+    <div id="searchTab" class="tab-pane active">
+      <div class="card">
+        <h3 style="margin-bottom: 16px;">Semantic Catalog Retrieval (POST /v1/search)</h3>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">
+          Simulates the natural-language search bar on <strong>jiulibrary</strong>. Returns ranked vector matches without calling LLMs.
+        </p>
+
+        <div class="form-group">
+          <label>Quick Query Examples:</label>
+          <button class="btn-secondary" onclick="prefillSearch('buku sejarah transisi politik peradaban dan tahanan')">Buku Sejarah Politik</button>
+          <button class="btn-secondary" onclick="prefillSearch('pedoman tata tertib dan sanksi keterlambatan')">SOP Tata Tertib</button>
+        </div>
+
+        <div class="form-group">
+          <label for="searchQueryInput">User Search Query:</label>
+          <input type="text" id="searchQueryInput" placeholder="Ketik topik pencarian alami (contoh: novel politik orba)...">
+        </div>
+
+        <button class="primary-btn" onclick="executeSearch()">Execute Semantic Search</button>
+
+        <div id="searchResults" class="results-container" style="display:none;">
+          <h4 id="searchSummaryText" style="margin-bottom: 16px;"></h4>
+          <div id="searchItemsList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Grounded Q&A (staff_portal mode) -->
+    <div id="askTab" class="tab-pane">
+      <div class="card">
+        <h3 style="margin-bottom: 16px;">Grounded Question-Answering (POST /v1/ask)</h3>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">
+          Simulates the procedural assistant on <strong>staff_portal</strong>. Returns verifiable answers with citation links.
+        </p>
+
+        <div class="form-group">
+          <label>Quick Question Examples:</label>
+          <button class="btn-secondary" onclick="prefillAsk('Berapa hari jatah cuti tahunan dan apa syarat pengajuannya?')">Pertanyaan Cuti</button>
+          <button class="btn-secondary" onclick="prefillAsk('Buku apa yang membahas peradaban kuno?')">Buku Peradaban</button>
+        </div>
+
+        <div class="form-group">
+          <label for="askQuestionInput">Employee / User Question:</label>
+          <input type="text" id="askQuestionInput" placeholder="Tanyakan isi aturan atau SOP...">
+        </div>
+
+        <button class="primary-btn" onclick="executeAsk()">Ask LODEX Engine</button>
+
+        <div id="askResults" style="display:none;">
+          <div class="answer-box">
+            <div class="answer-header">
+              <span class="grounded-badge">100% GROUNDED</span>
+              <span style="font-size: 13px; color: var(--mint);">Verified Against Official Document Store</span>
+            </div>
+            <div id="answerContent" class="answer-text"></div>
+
+            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;">VERIFIED CITATIONS:</div>
+            <div id="citationsList" class="citation-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 3: Document Ingestor -->
+    <div id="ingestTab" class="tab-pane">
+      <div class="card">
+        <h3 style="margin-bottom: 16px;">Ingest New Knowledge Document (POST /v1/documents)</h3>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">
+          Chunks and embeds text directly into the active tenant's isolated vector partition in Qdrant.
+        </p>
+
+        <div class="form-group">
+          <label>Quick Sample Data:</label>
+          <button class="btn-secondary" onclick="prefillBook()">Fill Book (jiulibrary)</button>
+          <button class="btn-secondary" onclick="prefillSOP()">Fill SOP (staff_portal)</button>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="docExtId">External ID (Database Primary Key):</label>
+            <input type="text" id="docExtId" placeholder="e.g. book_987 or sop_022">
+          </div>
+          <div class="form-group">
+            <label for="docCategory">Category:</label>
+            <input type="text" id="docCategory" placeholder="e.g. sejarah or kepegawaian">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="docTitle">Document Title:</label>
+          <input type="text" id="docTitle" placeholder="e.g. Buku Sejarah Peradaban Kuno">
+        </div>
+
+        <div class="form-group">
+          <label for="docContent">Document Text / Markdown Content:</label>
+          <textarea id="docContent" rows="6" placeholder="Ketik atau tempel isi paragraf dokumen di sini..."></textarea>
+        </div>
+
+        <button class="primary-btn" onclick="executeIngest()">Ingest & Vectorize Document</button>
+        <span id="ingestStatus" style="margin-left: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px;"></span>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    function getApiKey() {
+      return document.getElementById('tenantSelector').value;
+    }
+
+    function getActiveTenantName() {
+      const select = document.getElementById('tenantSelector');
+      return select.options[select.selectedIndex].getAttribute('data-id');
+    }
+
+    function switchTenant() {
+      // Clear previous search and ask results
+      document.getElementById('searchResults').style.display = 'none';
+      document.getElementById('askResults').style.display = 'none';
+      alert('Switched active tenant to: ' + getActiveTenantName() + '\nRequests are now strictly partitioned to this tenant.');
+    }
+
+    function setTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById(tabId).classList.add('active');
+      event.currentTarget.classList.add('active');
+    }
+
+    function prefillSearch(q) {
+      document.getElementById('searchQueryInput').value = q;
+    }
+
+    function prefillAsk(q) {
+      document.getElementById('askQuestionInput').value = q;
+    }
+
+    function prefillBook() {
+      document.getElementById('docExtId').value = 'book_hist_99';
+      document.getElementById('docCategory').value = 'sejarah';
+      document.getElementById('docTitle').value = 'Sejarah Politik dan Transisi Demokrasi Modern';
+      document.getElementById('docContent').value = 'Buku ini mengkaji secara komprehensif fase transisi kekuasaan dan pergantian rezim di era pasca-kolonial. Diulas pula catatan tahanan politik dan reformasi institusi hukum negara secara mendalam.';
+    }
+
+    function prefillSOP() {
+      document.getElementById('docExtId').value = 'sop_hr_044';
+      document.getElementById('docCategory').value = 'kepegawaian';
+      document.getElementById('docTitle').value = 'SOP-044: Prosedur Pengajuan Cuti Khusus dan Izin Sakit';
+      document.getElementById('docContent').value = 'Karyawan yang mengalami sakit berhak mendapatkan izin istirahat dengan melampirkan surat dokter resmi maksimal 3 hari kerja. Cuti melahirkan diberikan selama 3 bulan penuh dengan gaji pokok dibayarkan utuh.';
+    }
+
+    async function executeSearch() {
+      const query = document.getElementById('searchQueryInput').value.trim();
+      if (!query) return alert('Silakan ketik kata pencarian');
+
+      const apiKey = getApiKey();
+      const resContainer = document.getElementById('searchResults');
+      const list = document.getElementById('searchItemsList');
+      const summary = document.getElementById('searchSummaryText');
+
+      try {
+        const resp = await fetch('/v1/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+          body: JSON.stringify({ query: query, limit: 5 })
+        });
+
+        if (!resp.ok) {
+          const err = await resp.json();
+          alert('Error: ' + (err.detail || resp.statusText));
+          return;
+        }
+
+        const data = await resp.json();
+        resContainer.style.display = 'block';
+        summary.innerText = `Ditemukan ${data.total_found} dokumen yang relevan di tenant [${data.tenant_id}]:`;
+        list.innerHTML = '';
+
+        if (data.results.length === 0) {
+          list.innerHTML = '<p style="color: var(--text-muted);">Tidak ada dokumen yang cocok di tenant ini (Zero Leakage).</p>';
+          return;
+        }
+
+        data.results.forEach(r => {
+          const item = document.createElement('div');
+          item.className = 'result-card';
+          item.innerHTML = `
+            <div class="result-header">
+              <span class="result-title">${r.title} <small style="color: var(--text-muted); font-size: 12px;">(${r.external_id})</small></span>
+              <span class="score-badge">Similarity: ${(r.score * 100).toFixed(1)}%</span>
+            </div>
+            <p class="result-snippet">${r.snippet}</p>
+          `;
+          list.appendChild(item);
+        });
+      } catch (e) {
+        alert('Gagal menghubungi LODEX server: ' + e.message);
+      }
+    }
+
+    async function executeAsk() {
+      const question = document.getElementById('askQuestionInput').value.trim();
+      if (!question) return alert('Silakan ketik pertanyaan');
+
+      const apiKey = getApiKey();
+      const askResults = document.getElementById('askResults');
+      const answerEl = document.getElementById('answerContent');
+      const citationsEl = document.getElementById('citationsList');
+
+      try {
+        const resp = await fetch('/v1/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+          body: JSON.stringify({ question: question, limit: 4 })
+        });
+
+        if (!resp.ok) {
+          const err = await resp.json();
+          alert('Error: ' + (err.detail || resp.statusText));
+          return;
+        }
+
+        const data = await resp.json();
+        askResults.style.display = 'block';
+        answerEl.innerText = data.answer;
+        citationsEl.innerHTML = '';
+
+        if (!data.citations || data.citations.length === 0) {
+          citationsEl.innerHTML = '<span style="color: var(--text-muted);">Tidak ada sitasi dokumen di tenant ini.</span>';
+        } else {
+          data.citations.forEach(c => {
+            const pill = document.createElement('span');
+            pill.className = 'citation-pill';
+            pill.innerText = `📄 ${c.title} (${c.external_id})`;
+            citationsEl.appendChild(pill);
+          });
+        }
+      } catch (e) {
+        alert('Gagal menghubungi LODEX server: ' + e.message);
+      }
+    }
+
+    async function executeIngest() {
+      const extId = document.getElementById('docExtId').value.trim();
+      const title = document.getElementById('docTitle').value.trim();
+      const category = document.getElementById('docCategory').value.trim();
+      const content = document.getElementById('docContent').value.trim();
+      const statusEl = document.getElementById('ingestStatus');
+
+      if (!extId || !title || !content) return alert('Mohon lengkapi ID, Judul, dan Isi Dokumen.');
+
+      statusEl.style.color = 'var(--cyan)';
+      statusEl.innerText = 'Vectorizing & indexing...';
+
+      try {
+        const resp = await fetch('/v1/documents', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-API-Key': getApiKey() },
+          body: JSON.stringify({
+            external_id: extId,
+            title: title,
+            category: category || null,
+            content: content
+          })
+        });
+
+        if (!resp.ok) {
+          const err = await resp.json();
+          statusEl.style.color = '#EF4444';
+          statusEl.innerText = 'Gagal: ' + (err.detail || resp.statusText);
+          return;
+        }
+
+        const data = await resp.json();
+        statusEl.style.color = 'var(--mint)';
+        statusEl.innerText = `✅ Berhasil diindeks! (${data.chunks_created} chunks dibuat di ${data.tenant_id})`;
+      } catch (e) {
+        statusEl.style.color = '#EF4444';
+        statusEl.innerText = 'Error: ' + e.message;
+      }
+    }
+  </script>
+</body>
+</html>
