@@ -71,6 +71,62 @@ async def ingest_document(
     )
 
 
+from fastapi import UploadFile, File, Form
+from src.core.parser import extract_text_from_file
+import json
+
+@router.post(
+    "/upload",
+    status_code=status.HTTP_201_CREATED,
+    summary="Upload and ingest a physical file (PDF, DOCX, TXT)",
+)
+async def upload_document(
+    file: UploadFile = File(...),
+    external_id: str = Form(...),
+    category: str = Form(None),
+    metadata_json: str = Form(None),
+    tenant: TenantContext = Depends(get_current_tenant),
+):
+    """Extract text from uploaded file and ingest it into the vector store."""
+    file_bytes = await file.read()
+    
+    try:
+        content = extract_text_from_file(file_bytes, file.filename)
+    except ValueError as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail=str(e))
+        
+    client_metadata = {}
+    if metadata_json:
+        try:
+            client_metadata = json.loads(metadata_json)
+        except:
+            pass
+
+    chunks = chunk_text(content)
+    embeddings = embedding_service.embed_texts(chunks)
+    
+    point_ids = vector_store.upsert_chunks(
+        tenant_id=tenant.tenant_id,
+        external_id=external_id,
+        title=file.filename,
+        chunks=chunks,
+        embeddings=embeddings,
+        category=category,
+        source_url=None,
+        client_metadata=client_metadata,
+    )
+    
+    return {
+        "status": "indexed",
+        "tenant_id": tenant.tenant_id,
+        "external_id": external_id,
+        "filename": file.filename,
+        "chunks_created": len(chunks),
+        "point_ids": point_ids,
+    }
+
+
 @router.delete(
     "/{external_id}",
     status_code=status.HTTP_200_OK,
