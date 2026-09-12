@@ -1,117 +1,111 @@
-# ⚡ LODEX Middleware
+<div align="center">
+  <br />
+  <h1>LODEXI Core Engine</h1>
+  <p>
+    <strong>High-Performance, Multi-Tenant Knowledge Indexing & Grounded Retrieval Engine</strong>
+  </p>
+</div>
 
-> **Decoupled, Multi-Tenant Knowledge Indexing and Grounded Retrieval Engine for Web Applications**  
-> Built with Python 3.10+, FastAPI, and Qdrant Vector Database.
+<br />
+
+## 🚀 Overview
+
+**LODEXI Core** is the intelligence backend of the LODEXI ecosystem. It is a decoupled, ultra-fast RAG (Retrieval-Augmented Generation) engine built with **Python**, **FastAPI**, and **Qdrant Vector Database**.
+
+It provides semantic search, document ingestion, and grounded conversational QA capabilities for the `lodexi-portal` and any other external client applications.
 
 ---
 
-## 🎯 Key Features
+## ✨ Key Features
 
-1. **Strict Multi-Tenant Isolation**: Enforces tenant boundary partitioning via API keys (`X-API-Key`) and Qdrant metadata payload filtering. Zero cross-tenant data leakage.
+1. **Strict Multi-Tenant Isolation**: Enforces tenant boundary partitioning via `X-API-Key` validation and Qdrant payload filtering. Zero cross-tenant data leakage.
 2. **Dual-Mode Serving**:
-   - **`POST /v1/search`**: Pure semantic vector retrieval returning ranked chunks, scores, and metadata without LLM synthesis (ideal for search bars, catalogs, and carousels like `jiulibrary`).
-   - **`POST /v1/ask`**: Grounded conversational synthesis providing factual answers with verifiable citations and source links (ideal for procedural assistants like `staff_portal`).
-3. **Decoupled & Language-Agnostic**: Any client application written in TypeScript/Next.js, PHP/Laravel, Go, Python, or Ruby can integrate with simple JSON REST requests.
-4. **Flexible Runtime**: Runs 100% locally with embedded Qdrant (zero Docker required for development) or scaled via Docker Compose.
+   - **`POST /v1/search`**: Pure semantic vector retrieval returning ranked chunks, scores, and metadata without LLM synthesis.
+   - **`POST /v1/ask`**: Grounded conversational synthesis providing factual answers with verifiable citations and source links.
+3. **Decoupled & Language-Agnostic**: Easily connect any web app (Next.js, Laravel, Go, Node.js) via simple JSON REST requests.
+4. **Visual Dashboard**: Includes a built-in `dashboard.html` visualizer matching the LODEXI branding aesthetics.
+5. **Flexible Runtime**: Runs 100% locally with embedded Qdrant (zero Docker required) or scaled via Docker Compose.
 
 ---
 
-## 📁 Project Structure
+## 📁 Project Architecture
 
-```
-corerag/
+```text
+lodexi-core/
 ├── requirements.txt            # Python dependencies
-├── docker-compose.yml          # Optional Qdrant container config
 ├── .env.example                # Configuration template
 ├── src/
-│   ├── main.py                 # FastAPI application entrypoint & docs
+│   ├── main.py                 # FastAPI application entrypoint
 │   ├── config.py               # Pydantic environment settings
-│   ├── core/
-│   │   ├── security.py         # API key validation & tenant resolution
-│   │   ├── vector_store.py     # Qdrant client & isolated tenant filtering
-│   │   ├── embeddings.py       # Modular embedding provider
-│   │   └── llm.py              # Grounded synthesis provider
-│   ├── models/
-│   │   ├── tenant.py           # Tenant context models
-│   │   ├── document.py         # Ingestion schemas & chunk payloads
-│   │   └── query.py            # Search & Ask request/response schemas
-│   └── api/
-│       ├── dependencies.py     # FastAPI dependencies (X-API-Key auth)
-│       └── v1/
-│           ├── router.py       # Aggregated v1 endpoints
-│           ├── documents.py    # POST & DELETE /v1/documents
-│           ├── search.py       # POST /v1/search
-│           └── ask.py          # POST /v1/ask
-└── tests/
-    ├── conftest.py             # Pytest configuration & fixtures
-    └── test_tenant_isolation.py# Automated multi-tenant security verification
+│   ├── core/                   # Security, Vector Store, LLM configs
+│   ├── models/                 # Request/Response Pydantic schemas
+│   ├── templates/              # Visual UI Dashboard
+│   └── api/                    # v1 REST Endpoints
+└── tests/                      # Automated Pytest suite
 ```
 
 ---
 
-## 🚀 Quickstart Guide
+## 🛠️ Quickstart Guide
 
 ### 1. Setup Environment
+
 ```bash
-cd "d:/Learning Agents/Skripsi/04-kode/corerag"
+git clone https://github.com/lodexi/core.git lodexi-core
+cd lodexi-core
 
 # Create and activate virtual environment
 python -m venv .venv
+
+# Windows:
 .\.venv\Scripts\activate
+# Mac/Linux:
+# source .venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 
 # Copy environment settings
-copy .env.example .env
+cp .env.example .env
 ```
 
-### 2. Run the Development Server
+### 2. Run the Engine
+
 ```bash
 uvicorn src.main:app --reload --port 8000
 ```
 
-Once running, access the interactive Swagger documentation at:  
-👉 **http://localhost:8000/docs**
+- **Visual Dashboard**: [http://localhost:8000](http://localhost:8000)
+- **Swagger API Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
 
-### 3. Run Automated Multi-Tenant Security Tests
+### 3. Run Automated Tests
+
 ```bash
 pytest
 ```
 
 ---
 
-## 🔌 API Client Integration Examples
+## 🔌 API Integration Examples
 
-### Example 1: `jiulibrary` (Next.js / TypeScript)
-```typescript
-// Call CoreRAG Semantic Search for catalog exploration
-const response = await fetch('http://localhost:8000/v1/search', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'X-API-Key': 'key_jiulibrary_secret_123',
-  },
-  body: JSON.stringify({
-    query: 'Buku sejarah transisi politik peradaban',
-    limit: 5,
-  }),
-});
-
-const data = await response.json();
-console.log('Found books:', data.results);
-```
-
-### Example 2: `staff_portal` (Laravel / PHP)
+### Example: LODEXI Portal (PHP/Laravel)
 ```php
-// Call CoreRAG Grounded QA for employee SOP questions
+// Call LODEXI Core Grounded QA
 $response = Http::withHeaders([
-    'X-API-Key' => 'key_staffportal_secret_456',
+    'X-API-Key' => 'key_portal_secret_123',
 ])->post('http://localhost:8000/v1/ask', [
-    'question' => 'Berapa hari batas maksimal cuti tahunan?',
+    'question' => 'How to setup multi-tenancy?',
     'limit' => 4,
 ]);
 
 $answer = $response->json()['answer'];
 $citations = $response->json()['citations'];
 ```
+
+---
+
+## 📜 License
+
+Copyright © 2026 LODEXI. All rights reserved.
+
+This software is proprietary. You may not use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the software without explicit written permission.
