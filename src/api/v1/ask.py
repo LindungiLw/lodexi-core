@@ -1,5 +1,5 @@
-from typing import List
-from fastapi import APIRouter, Depends, status
+from typing import List, Optional
+from fastapi import APIRouter, Depends, status, Header
 from src.api.dependencies import get_current_tenant
 from src.core.embeddings import embedding_service
 from src.core.llm import llm_service
@@ -19,18 +19,46 @@ router = APIRouter(prefix="/ask", tags=["Conversational Q&A"])
 async def ask_question(
     payload: AskRequest,
     tenant: TenantContext = Depends(get_current_tenant),
+    x_tenant_llm_key: Optional[str] = Header(default=None, alias="X-Tenant-LLM-Key"),
+    x_tenant_llm_provider: Optional[str] = Header(default=None, alias="X-Tenant-LLM-Provider"),
 ):
     """Retrieve relevant contexts and synthesize a grounded answer."""
     query_vector = embedding_service.embed_query(payload.question)
     
+    # 1. Check Semantic Cache First
+    cached_answer = vector_store.get_cached_answer(tenant.tenant_id, query_vector, threshold=0.95)
+    if cached_answer:
+        return AskResponse(
+            tenant_id=tenant.tenant_id,
+            question=payload.question,
+            answer=cached_answer,
+            citations=[],
+            grounded=True,
+            model_used=llm_service.model,
+            cached=True,
+            prompt_tokens=0,
+            completion_tokens=0
+        )
+
+    # 2. Vector Search with Relevance Threshold
     contexts = vector_store.search_tenant(
         tenant_id=tenant.tenant_id,
         query_vector=query_vector,
         limit=payload.limit,
         category_filter=payload.category_filter,
+        min_score=0.5,  # Anti-hallucination threshold
     )
     
-    answer = llm_service.synthesize_answer(payload.question, contexts)
+    # 3. LLM Synthesis (RAG or Friendly Fallback)
+    answer, prompt_tokens, completion_tokens = llm_service.synthesize_answer(
+        payload.question, 
+        contexts, 
+        custom_api_key=x_tenant_llm_key,
+        custom_provider=x_tenant_llm_provider
+    )
+    
+    # 4. Save to Semantic Cache
+    vector_store.cache_answer(tenant.tenant_id, query_vector, payload.question, answer)
     
     citations: List[Citation] = [
         Citation(
@@ -48,6 +76,9 @@ async def ask_question(
         question=payload.question,
         answer=answer,
         citations=citations,
-        grounded=len(contexts) > 0,
+        grounded=True,
         model_used=llm_service.model,
+        cached=False,
+        prompt_tokens=prompt_tokens,
+        completion_tokens=completion_tokens
     )

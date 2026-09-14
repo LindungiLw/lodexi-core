@@ -60,3 +60,6 @@ class AskResponse(BaseModel):
     citations: List[Citation]
     grounded: bool = True
     model_used: str = "mock"
+    cached: bool = False
+    prompt_tokens: int = 0
+    completion_tokens: int = 0

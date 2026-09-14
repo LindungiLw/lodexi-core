@@ -12,6 +12,7 @@ class VectorStoreService:
     
     def __init__(self):
         self.collection_name = settings.QDRANT_COLLECTION
+        self.cache_collection_name = f"{self.collection_name}_semantic_cache"
         self.dimension = settings.EMBEDDING_DIMENSION
         self.client = self._init_client()
         self._ensure_collection_exists()
@@ -34,6 +35,15 @@ class VectorStoreService:
         if self.collection_name not in collections:
             self.client.create_collection(
                 collection_name=self.collection_name,
+                vectors_config=qmodels.VectorParams(
+                    size=self.dimension,
+                    distance=qmodels.Distance.COSINE,
+                ),
+            )
+        
+        if self.cache_collection_name not in collections:
+            self.client.create_collection(
+                collection_name=self.cache_collection_name,
                 vectors_config=qmodels.VectorParams(
                     size=self.dimension,
                     distance=qmodels.Distance.COSINE,
@@ -174,6 +184,54 @@ class VectorStoreService:
             points_selector=qmodels.FilterSelector(filter=del_filter),
         )
         return True
+
+    def get_cached_answer(self, tenant_id: str, query_vector: List[float], threshold: float = 0.95) -> Optional[str]:
+        """Search the semantic cache for highly similar previous queries."""
+        tenant_filter = qmodels.Filter(must=[
+            qmodels.FieldCondition(key="tenant_id", match=qmodels.MatchValue(value=tenant_id))
+        ])
+        
+        try:
+            hits = self.client.search(
+                collection_name=self.cache_collection_name,
+                query_vector=query_vector,
+                query_filter=tenant_filter,
+                limit=1,
+                score_threshold=threshold,
+            )
+        except AttributeError:
+            res = self.client.query_points(
+                collection_name=self.cache_collection_name,
+                query=query_vector,
+                query_filter=tenant_filter,
+                limit=1,
+                score_threshold=threshold,
+            )
+            hits = res.points
+
+        if hits:
+            return str(hits[0].payload.get("answer", ""))
+        return None
+
+    def cache_answer(self, tenant_id: str, query_vector: List[float], question: str, answer: str) -> None:
+        """Store a generated answer in the semantic cache."""
+        point_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{tenant_id}:{question}"))
+        
+        self.client.upsert(
+            collection_name=self.cache_collection_name,
+            points=[
+                qmodels.PointStruct(
+                    id=point_id,
+                    vector=query_vector,
+                    payload={
+                        "tenant_id": tenant_id,
+                        "question": question,
+                        "answer": answer,
+                    },
+                )
+            ],
+            wait=False,
+        )
 
 
 vector_store = VectorStoreService()
