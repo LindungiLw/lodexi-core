@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     EMBEDDING_DIMENSION: int = 384
 
     # LLM
-    LLM_PROVIDER: Literal["mock", "openai", "litellm"] = "mock"
+    LLM_PROVIDER: Literal["mock", "openai", "litellm", "gemini"] = "mock"
     OPENAI_API_KEY: str = ""
     LLM_MODEL: str = "gpt-4o-mini"
 
@@ -36,6 +36,11 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore"
     )
+
+    @property
+    def api_keys_list(self) -> list[str]:
+        """Parsed list of multiple LLM API keys for rotation."""
+        return [k.strip() for k in self.OPENAI_API_KEY.split(",") if k.strip()]
 
     @property
     def api_key_to_tenant_map(self) -> Dict[str, str]:

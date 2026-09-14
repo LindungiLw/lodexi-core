@@ -25,10 +25,19 @@ class LLMService:
                 f"{top_snippet}"
             )
 
-        # Real LLM call via OpenAI / LiteLLM
+        # Real LLM call via OpenAI or Gemini (OpenAI compatibility)
         try:
+            import random
             from openai import OpenAI
-            client = OpenAI(api_key=self.api_key)
+            
+            # Rotate API keys randomly per request to avoid free-tier rate limits
+            active_key = random.choice(settings.api_keys_list) if settings.api_keys_list else self.api_key
+            
+            kwargs = {"api_key": active_key}
+            if self.provider == "gemini":
+                kwargs["base_url"] = "https://generativelanguage.googleapis.com/v1beta/openai/"
+                
+            client = OpenAI(**kwargs)
             
             context_block = "\n\n".join(
                 [f"[{i+1}] Dokumen: {c.title} (ID: {c.external_id})\n{c.snippet}" for i, c in enumerate(contexts)]
